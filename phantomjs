@@ -1,0 +1,19 @@
+FROM debian:7.4
+MAINTAINER Antoine Vianey <http://github.com/avianey>
+
+RUN apt-get update
+RUN apt-get -f install
+
+RUN export DEBIAN_FRONTEND=noninteractive
+RUN apt-get -y install wget
+RUN wget -P /tmp/ --no-check-certificate https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.7-linux-x86_64.tar.bz2
+RUN apt-get install bzip2
+RUN tar -xvjf /tmp/phantomjs-1.9.7-linux-x86_64.tar.bz2 --directory=/tmp/
+RUN mv /tmp/phantomjs-1.9.7-linux-x86_64/bin/phantomjs /usr/local/bin/
+RUN rm -rf /tmp/*
+RUN apt-get install -y fontconfig
+
+# rights management
+# user phatomjs with no shell
+RUN useradd -g 46 -s /sbin/false -d /opt/phantomjs/temp phantomjs
+RUN chown -R phantomjs /usr/local/bin/phantomjs
