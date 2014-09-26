@@ -1,0 +1,50 @@
+FROM debian:latest
+MAINTAINER Antoine Vianey <http://github.com/avianey>
+
+RUN apt-get update
+RUN apt-get -f install
+
+# install java
+RUN apt-get -y install --no-install-recommends openjdk-7-jdk
+
+# install wget
+RUN export DEBIAN_FRONTEND=noninteractive
+RUN apt-get -y install wget
+
+# download tomee
+# change mirror & distrib (jaxr, plus, webprofile, plumee)
+RUN wget -P /tmp/ http://apache.websitebeheerjd.nl/tomee/tomee-1.7.0/apache-tomee-1.7.0-jaxrs.tar.gz
+
+# extract
+RUN tar xzvf /tmp/apache-tomee-1.7.0-jaxrs.tar.gz -C /tmp
+RUN mv /tmp/apache-tomee-jaxrs-1.7.0 /usr/local/bin/
+RUN rm -rf /tmp/*
+
+# clean webapps
+# RUN rm -rf /usr/local/bin/apache-tomee-jaxrs-1.7.0/webapps/ROOT
+# RUN rm -rf /usr/local/bin/apache-tomee-jaxrs-1.7.0/webapps/docs
+# RUN rm -rf /usr/local/bin/apache-tomee-jaxrs-1.7.0/webapps/host-manager
+# RUN rm -rf /usr/local/bin/apache-tomee-jaxrs-1.7.0/webapps/manager
+# RUN rm -rf /usr/local/bin/apache-tomee-jaxrs-1.7.0/webapps/tomee
+
+# configure users and roles
+RUN echo "<tomcat-users><role rolename=\"tomee-admin\" /><user username=\"tomee\" password=\"tomee\" roles=\"tomee-admin,manager-gui\" /></tomcat-users>" > /usr/local/bin/apache-tomee-jaxrs-1.7.0/conf/tomcat-users.xml
+
+# rights management
+# user tomee with no shell
+RUN useradd -g 46 -s /sbin/false -d /opt/tomee/temp tomee
+RUN chown -R tomee /usr/local/bin/apache-tomee-jaxrs-1.7.0
+# RUN chmod -R g-wx /usr/local/bin/apache-tomee-jaxrs-1.7.0
+# RUN chmod -R o-rwx /usr/local/bin/apache-tomee-jaxrs-1.7.0
+
+# env vars
+ENV TOMEE_HOME /usr/local/bin/apache-tomee-jaxrs-1.7.0
+ENV PATH $TOMEE_HOME/bin:$PATH
+
+# port forwarding
+EXPOSE 8080
+
+# Usage : 
+# 
+# docker run -i -t -p 8080:8080 -u="tomee" avianey/tomee-jaxrs-1.7.0 catalina.sh run
+# docker run -d -p 8080:8080 -u="tomee" avianey/tomee-jaxrs-1.7.0 catalina.sh start
