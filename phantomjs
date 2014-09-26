@@ -4,10 +4,17 @@ MAINTAINER Antoine Vianey <http://github.com/avianey>
 RUN apt-get update
 RUN apt-get -f install
 
+# Install wget
 RUN export DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y install wget
+
+# download phantomjs
 RUN wget -P /tmp/ --no-check-certificate https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-1.9.7-linux-x86_64.tar.bz2
+
+# install bzip2
 RUN apt-get install bzip2
+
+# extract & install requirements
 RUN tar -xvjf /tmp/phantomjs-1.9.7-linux-x86_64.tar.bz2 --directory=/tmp/
 RUN mv /tmp/phantomjs-1.9.7-linux-x86_64/bin/phantomjs /usr/local/bin/
 RUN rm -rf /tmp/*
