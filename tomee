@@ -45,6 +45,6 @@ ENV PATH $TOMEE_HOME/bin:$PATH
 EXPOSE 8080
 
 # Usage : 
-# 
+# docker build -t avianey/tomee-jaxrs-1.7.0 .
 # docker run -i -t -p 8080:8080 -u="tomee" avianey/tomee-jaxrs-1.7.0 catalina.sh run
 # docker run -d -p 8080:8080 -u="tomee" avianey/tomee-jaxrs-1.7.0 catalina.sh start
