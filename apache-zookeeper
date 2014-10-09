@@ -1,0 +1,62 @@
+FROM debian:latest
+MAINTAINER Antoine Vianey <http://github.com/avianey>
+
+RUN apt-get update
+RUN apt-get -f install
+
+# install java
+RUN apt-get -y install --no-install-recommends openjdk-7-jdk
+
+# install wget
+RUN export DEBIAN_FRONTEND=noninteractive
+RUN apt-get -y install wget
+
+# download zookeeper
+# change mirror if needed
+RUN wget -P /tmp/ http://apache.websitebeheerjd.nl/zookeeper/stable/zookeeper-3.4.6.tar.gz
+
+# extract
+RUN tar xzvf /tmp/zookeeper-3.4.6.tar.gz -C /tmp
+RUN mv /tmp/zookeeper-3.4.6 /usr/local/bin/zookeeper
+RUN rm -rf /tmp/*
+
+# configure directories
+RUN mkdir -p /var/zookeeper/data
+
+# rights management
+# user zookeeper with no shell
+RUN useradd -g 46 -s /sbin/false -d /opt/zookeeper/temp zookeeper
+RUN chown -R zookeeper /usr/local/bin/zookeeper
+RUN chown -R zookeeper /var/zookeeper/data
+RUN chmod -R o-x /var/zookeeper/data
+RUN chmod -R o-x /var/zookeeper/data
+
+# env vars
+ENV ZOO_HOME /usr/local/bin/zookeeper
+ENV ZOOCFGDIR /var/zookeeper/config
+#ENV ZOOCFG zoo.cfg
+ENV PATH $ZOO_HOME/bin:$PATH
+
+# ports forwarding
+EXPOSE 2181
+EXPOSE 2888
+EXPOSE 3888
+
+# Usage : 
+#
+# On a shared filesystem, create a zoo.cfg file :
+#   tickTime=2000
+#   dataDir=/var/zookeeper/data
+#   clientPort=2181
+#   initLimit=5
+#   syncLimit=2
+#   server.1=zoo1:2888:3888
+#   server.2=zoo2:2888:3888
+#   server.3=zoo3:2888:3888
+#
+# Build :
+# docker build -t avianey/zookeeper:3.4.6 .
+#
+# Run :
+# docker run -i -t -h zoo1 -p 2888:2888 -p 3888:3888 -p 2181:2181 -v /tmp:/var/zookeeper/config -u="zookeeper" avianey/zookeeper:3.4.6 sh -c 'echo 1 > /var/zookeeper/data/myid && zkServer.sh start-foreground'
+# docker run -d -h zoo1 -p 2888:2888 -p 3888:3888 -p 2181:2181 -v /tmp:/var/zookeeper/config -u="zookeeper" avianey/zookeeper:3.4.6 sh -c 'echo 1 > /var/zookeeper/data/myid && zkServer.sh start-foreground'
